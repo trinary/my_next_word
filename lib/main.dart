@@ -43,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    debugPrint('running initState, about to initSpeech');
     _initSpeech();
   }
 
@@ -74,7 +75,9 @@ class _MyHomePageState extends State<MyHomePage> {
     _speechAvailable = await _speechToText.initialize(
       onError: errorListener,
       onStatus: statusListener,
+      debugLogging: true,
     );
+    debugPrint("initSpeech running, _speechAvailable: $_speechAvailable");
     setState(() {});
   }
 

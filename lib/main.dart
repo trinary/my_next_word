@@ -33,7 +33,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _recording = false;
-  SpeechToText _speechToText = SpeechToText();
+  final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   bool _speechAvailable = false;
   String _currentWords = '';
@@ -52,8 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void statusListener(String status) async {
-    debugPrint("status $status");
-    if (status == "done" && _speechEnabled) {
+    debugPrint("statusListener $status");
+    if ((status == "notListening" || status == "done") && _speechEnabled) {
       setState(() {
       _lastWords += " $_currentWords";
       _currentWords = "";
@@ -82,11 +82,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future _startListening() async {
+    debugPrint("startListening running");
     await _stopListening();
-    await Future.delayed(const Duration(milliseconds: 50));
+    debugPrint("stopListening complete");
+    await Future.delayed(const Duration(milliseconds: 20));
+    debugPrint("restart delay complete");
     await _speechToText.listen(
       onResult: _onSpeechResult,
-      localeId: _selectedLocaleId,
+      //localeId: _selectedLocaleId,
       listenOptions: SpeechListenOptions(
         cancelOnError: false, 
         partialResults: true, 
@@ -94,10 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
         onDevice: true
       )
     );
+    debugPrint("listen complete");
     setState(() {_speechEnabled = true;});
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
+    debugPrint("onSpeechResult: $result");
     setState(() {
       _currentWords = result.recognizedWords;
     });
@@ -118,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    var barColor = _speechToText.isListening ? Colors.red : Colors.blue;
+    var barColor = _speechToText.isListening ? Colors.red : Colors.lightGreen;
    
     return Scaffold(
       appBar: AppBar(
@@ -139,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _speechToText.isListening ? _stopListening : _startListening,
-        tooltip: 'Toggle Recording',
+        tooltip: 'Toggle Recognition',
         child: Icon(_speechToText.isListening ? Icons.mic : Icons.mic_external_off),
       ),
     );
